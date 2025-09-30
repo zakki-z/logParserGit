@@ -2,84 +2,57 @@
 
 namespace App\Controller;
 
-use App\Repository\LogEntryRepository;
-use App\Service\SavingService;
-use App\Service\ParsingService;
-use Mpdf\Output\Destination;
+use App\Repository\LogEntriesRepository;
+use App\Service\PdfMaker;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Mpdf\Mpdf;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/log')]
-#[IsGranted('ROLE_USER')]
-class LogController extends AbstractController
+
+final class LogController extends AbstractController
 {
-    #[Route('/', name: 'log_index')]
-    public function index(LogEntryRepository $logRepository): Response
+    #[Route('/log', name: 'app_log_view')]
+    public function view(Request $request, LogEntriesRepository $repository): Response
     {
         $user = $this->getUser();
-        $logs = $logRepository->findAllOrdered($user->getId());
-        $uploadedFiles = $logRepository->getUploadedFiles($user->getId());
-
-
+        $severityFilter = $request->query->get('severity', '');
+        $queryBuilder = $repository->findByUserQueryBuilder($user);
+        if (!empty($severityFilter)) {
+            $queryBuilder->andWhere('l.type = :severity')
+                ->setParameter('severity', $severityFilter);
+        }
+        $adapter = new QueryAdapter($queryBuilder);
+        $pagerfanta = new Pagerfanta($adapter);
+        $pagerfanta->setMaxPerPage(10); // Items per page
+        $pagerfanta->setCurrentPage($request->query->get('page', 1));
         return $this->render('log/index.html.twig', [
-            'logs' => $logs,
-            'uploadedFiles' => $uploadedFiles
+            'logEntries' => $pagerfanta->getCurrentPageResults(),
+            'pager' => $pagerfanta,
+            'severityFilter' => $severityFilter
         ]);
     }
-    #[Route('/upload', name: 'log_upload', methods: ['POST'])]
-    public function upload(Request $request, ParsingService $logParser, SavingService $saveLog): Response
+    #[Route('/pdf', name: 'log_pdf', methods: ['GET'])]
+    public function pdf(LogEntriesRepository $logRepository, PdfMaker $pdfMaker): Response
     {
-        /** @var UploadedFile $uploadedFile */
-        $uploadedFile = $request->files->get('logfile');
+        $user = $this->getUser();
+        $logEntries = $logRepository->findByUser($user);
 
-        if ($uploadedFile && $uploadedFile->getError() === UPLOAD_ERR_OK) {
-            try {
+        $logPdf = $pdfMaker->generateLogPdf($logEntries);
 
-                $user = $this->getUser();
-
-                $result = $logParser->parseLogFile(
-                    $uploadedFile->getPathname(),
-                    $uploadedFile->getClientOriginalName(),
-                    $user
-                );
-                    $saveLog->saveLogEntries($result['entries']);
-                    $this->addFlash('success', $result['message']);
-
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Error parsing file: ' . $e->getMessage());
-            }
-        } else {
-            $this->addFlash('error', 'Please select a valid file');
-        }
-
-        return $this->redirectToRoute('log_index');
+        return new Response($logPdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="logs.pdf"'
+        ]);
     }
     #[Route('/clear', name: 'log_clear', methods: ['POST'])]
-    public function clear(LogEntryRepository $logRepository): Response
+    public function clear(LogEntriesRepository $logRepository): Response
     {
         $file = $this->getUser();
         $logRepository->clearAllByUser($file->getId());
         $this->addFlash('success', 'All your logs cleared');
-
-        return $this->redirectToRoute('log_index');
-    }
-    #[Route('/pdf', name: 'log_pdf', methods: ['GET'])]
-    public function pdf(LogEntryRepository $logRepository):Response
-    {
-        $mpdf = new Mpdf();
-        $content = "<h1>Head</h1>";
-        $content .= '<p> <b>test</b></p>';
-
-        $mpdf->writeHtml($content);
-        $logPdf = $mpdf->output('', Destination::STRING_RETURN);
-        return new Response($logPdf, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="log.pdf"'
-        ]);
+        return $this->redirectToRoute('app_log_view');
     }
 }
