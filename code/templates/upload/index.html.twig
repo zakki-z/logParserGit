@@ -1,176 +1,62 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Upload Logs - Log Parser{% endblock %}
+{% block title %}Upload Log File{% endblock %}
 
 {% block body %}
-    <div class="relative flex size-full min-h-screen flex-col bg-gray-50" style='font-family: "Spline Sans", "Noto Sans", sans-serif;'>
-        <!-- Header -->
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 px-10 py-3 bg-white">
-            <div class="flex items-center gap-4 text-gray-800">
-                <div class="size-8 text-[var(--primary-color)]">
-                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
-                        <path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
-                    </svg>
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-blue-600 px-6 py-4">
+                    <h3 class="text-2xl font-bold text-white">Upload Log File</h3>
                 </div>
-                <h2 class="text-gray-800 text-lg font-bold leading-tight tracking-[-0.015em]">Log Parser</h2>
-            </div>
-
-            <div class="flex flex-1 justify-end gap-8">
-                <div class="flex items-center gap-9">
-                    <a class="text-gray-500 hover:text-gray-800 text-sm font-medium leading-normal transition-colors" href="{{ path('log_index') }}">Dashboard</a>
-                    <a class="text-gray-900 text-sm font-semibold border-b-2 border-[var(--primary-color)] pb-1" href="#">Upload</a>
-                    <a class="text-gray-500 hover:text-gray-800 text-sm font-medium leading-normal transition-colors" href="#">Settings</a>
-                    <a class="text-gray-500 hover:text-gray-800 text-sm font-medium leading-normal transition-colors" href="#">Help</a>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    {% if app.user %}
-                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-gray-300 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-gray-600">person</span>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </header>
-
-        <!-- Flash Messages -->
-        {% for type, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="mx-10 mt-4 rounded-md p-4 {% if type == 'error' %}bg-red-50 text-red-800{% elseif type == 'warning' %}bg-yellow-50 text-yellow-800{% else %}bg-green-50 text-green-800{% endif %}">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                        <span class="material-symbols-outlined {% if type == 'error' %}text-red-400{% elseif type == 'warning' %}text-yellow-400{% else %}text-green-400{% endif %}">
-                            {% if type == 'error' %}error{% elseif type == 'warning' %}warning{% else %}check_circle{% endif %}
-                        </span>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium">{{ message }}</p>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endfor %}
-
-        <!-- Main Content -->
-        <div class="px-10 flex flex-1 justify-center py-5">
-            <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
-                <div class="flex flex-wrap justify-between gap-3 p-4">
-                    <div class="flex min-w-72 flex-col gap-3">
-                        <p class="text-gray-800 tracking-light text-[32px] font-bold leading-tight">Upload Log Files</p>
-                        <p class="text-gray-500 text-base font-normal leading-normal">Drag and drop your log files here or browse to upload. Accepted formats: .log, .txt</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-col p-4">
-                    <form action="{{ path('log_upload') }}" method="post" enctype="multipart/form-data" id="uploadForm">
-                        <div class="flex flex-col items-center gap-6 rounded-xl border-2 border-dashed border-gray-200 px-6 py-20 bg-gray-50 hover:border-[var(--primary-color)] transition-colors" id="dropZone">
-                            <div class="flex flex-col items-center gap-4">
-                                <div class="rounded-full bg-gray-200 p-4 text-[var(--primary-color)]">
-                                    <span class="material-symbols-outlined text-4xl">upload</span>
-                                </div>
-                                <p class="text-gray-800 text-xl font-bold leading-tight tracking-[-0.015em] max-w-[480px] text-center">Drag and drop files here</p>
-                                <p class="text-gray-500 text-sm font-normal leading-normal max-w-[480px] text-center">Or</p>
-                            </div>
-
-                            <input type="file" name="logfile" accept=".log,.txt" required class="hidden" id="fileInput">
-                            <button type="button" onclick="document.getElementById('fileInput').click()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-[var(--primary-color)] text-black text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-80 transition-colors">
-                                <span class="truncate">Browse Files</span>
+                <div class="p-6">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 relative" role="alert">
+                            {{ message }}
+                            <button type="button" class="absolute top-0 right-0 px-4 py-3" data-bs-dismiss="alert">
+                                <span class="text-2xl">&times;</span>
                             </button>
+                        </div>
+                    {% endfor %}
 
-                            <div id="fileInfo" class="hidden text-center">
-                                <p class="text-gray-700 font-medium" id="fileName"></p>
-                                <p class="text-gray-500 text-sm" id="fileSize"></p>
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative" role="alert">
+                            {{ message }}
+                            <button type="button" class="absolute top-0 right-0 px-4 py-3" data-bs-dismiss="alert">
+                                <span class="text-2xl">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+
+                    <form method="post" action="{{ path('app_upload_process') }}" enctype="multipart/form-data" class="space-y-4">
+                        <div class="form-group">
+                            <label for="log_file" class="block text-gray-700 font-medium mb-2">Select Log File</label>
+                            <input type="file"
+                                   class="form-control w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   id="log_file"
+                                   name="log_file"
+                                   accept=".log,.txt"
+                                   required>
+                            <div class="text-sm text-gray-600 mt-2">
+                                Allowed formats: .log, .txt (Max size: 10MB)
                             </div>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                                Upload File
+                            </button>
                         </div>
                     </form>
-                </div>
 
-                <div class="flex flex-col gap-4 p-4" id="progressSection" style="display: none;">
-                    <div class="flex gap-6 justify-between">
-                        <p class="text-gray-800 text-base font-medium leading-normal">Upload Progress</p>
-                    </div>
-                    <div class="relative h-2.5 w-full rounded-full bg-gray-200">
-                        <div class="h-full rounded-full bg-[var(--primary-color)] transition-all duration-300" style="width: 0%;" id="progressBar"></div>
-                    </div>
-                    <p class="text-gray-500 text-sm font-normal leading-normal self-end" id="progressText">0%</p>
-                </div>
+                    <hr class="my-6 border-gray-300">
 
-                <p class="text-gray-500 text-sm font-normal leading-normal pb-3 pt-1 px-4 text-center">
-                    By uploading, you agree to our
-                    <a class="text-gray-800 underline" href="#">Terms of Service</a> and
-                    <a class="text-gray-800 underline" href="#">Privacy Policy</a>.
-                </p>
+                    <div>
+                        <a href="{{ path('app_log_view') }}" class="inline-block text-blue-600 hover:text-blue-800 font-medium">
+                            View My Uploaded Files →
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
-            const uploadForm = document.getElementById('uploadForm');
-            const fileInfo = document.getElementById('fileInfo');
-            const fileName = document.getElementById('fileName');
-            const fileSize = document.getElementById('fileSize');
-            const progressSection = document.getElementById('progressSection');
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-
-            // Drag and drop functionality
-            dropZone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                dropZone.classList.add('border-[var(--primary-color)]', 'bg-green-50');
-            });
-
-            dropZone.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                dropZone.classList.remove('border-[var(--primary-color)]', 'bg-green-50');
-            });
-
-            dropZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                dropZone.classList.remove('border-[var(--primary-color)]', 'bg-green-50');
-
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileSelection(files[0]);
-                }
-            });
-
-            fileInput.addEventListener('change', function(e) {
-                if (e.target.files.length > 0) {
-                    handleFileSelection(e.target.files[0]);
-                }
-            });
-
-            function handleFileSelection(file) {
-                fileName.textContent = file.name;
-                fileSize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
-                fileInfo.classList.remove('hidden');
-
-                // Auto-submit form
-                setTimeout(() => {
-                    progressSection.style.display = 'block';
-                    simulateProgress();
-                    uploadForm.submit();
-                }, 500);
-            }
-
-            function simulateProgress() {
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += Math.random() * 15;
-                    if (progress > 100) progress = 100;
-
-                    progressBar.style.width = progress + '%';
-                    progressText.textContent = Math.round(progress) + '%';
-
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                    }
-                }, 200);
-            }
-        });
-    </script>
 {% endblock %}
