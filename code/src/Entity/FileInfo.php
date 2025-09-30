@@ -2,15 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\FileRepository;
+use App\Repository\FileInfoRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 
-#[ORM\Entity(repositoryClass: FileRepository::class)]
-class File
+#[ORM\Entity(repositoryClass: FileInfoRepository::class)]
+class FileInfo
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
@@ -26,10 +26,11 @@ class File
     private ?string $fileNameTime = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private ?\DateTimeImmutable $uploaded_at = null;
+    private ?\DateTimeImmutable $uploadedAt = null;
 
     #[ORM\Column]
-    private ?int $file_size = null;
+    private ?int $fileSize = null;
+
     #[ORM\ManyToOne(targetEntity: User::class, fetch: 'LAZY', inversedBy: 'file')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user= null;
@@ -61,24 +62,24 @@ class File
     }
     public function getUploadedAt(): ?\DateTimeImmutable
     {
-        return $this->uploaded_at;
+        return $this->uploadedAt;
     }
 
     public function setUploadedAt(\DateTimeImmutable $uploaded_at): static
     {
-        $this->uploaded_at = $uploaded_at;
+        $this->uploadedAt = $uploaded_at;
 
         return $this;
     }
 
     public function getFileSize(): ?int
     {
-        return $this->file_size;
+        return $this->fileSize;
     }
 
     public function setFileSize(int $file_size): static
     {
-        $this->file_size = $file_size;
+        $this->fileSize = $file_size;
 
         return $this;
     }

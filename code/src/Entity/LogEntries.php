@@ -2,13 +2,12 @@
 
 namespace App\Entity;
 
+use App\Repository\LogEntriesRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'log_entries')]
-class LogEntry
+#[ORM\Entity(repositoryClass: LogEntriesRepository::class)]
+class LogEntries
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -18,18 +17,18 @@ class LogEntry
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(length: 255)]
     private ?string $channel = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 255)]
     private ?string $type = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: types::TEXT)]
     private ?string $information = null;
 
-    #[ORM\ManyToOne(targetEntity: File::class, fetch: 'LAZY', inversedBy: 'logEntries')]
+    #[ORM\ManyToOne(targetEntity: FileInfo::class, fetch: 'LAZY', inversedBy: 'logEntries')]
     #[ORM\JoinColumn(nullable: true)]
-    private ?File $file = null;
+    private ?FileInfo $file = null;
     public function getId(): ?int
     {
         return $this->id;
@@ -43,6 +42,7 @@ class LogEntry
     public function setDate(\DateTimeInterface $date): static
     {
         $this->date = $date;
+
         return $this;
     }
 
@@ -54,6 +54,7 @@ class LogEntry
     public function setChannel(string $channel): static
     {
         $this->channel = $channel;
+
         return $this;
     }
 
@@ -65,6 +66,7 @@ class LogEntry
     public function setType(string $type): static
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -76,14 +78,14 @@ class LogEntry
     public function setInformation(string $information): static
     {
         $this->information = $information;
+
         return $this;
     }
-    public function getFile(): ?File
+    public function getFile(): ?FileInfo
     {
         return $this->file;
     }
-
-    public function setFile(?File $file): static
+    public function setFile(?FileInfo $file): static
     {
         $this->file = $file;
         return $this;
