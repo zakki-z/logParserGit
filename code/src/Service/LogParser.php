@@ -2,31 +2,14 @@
 
 namespace App\Service;
 
-use App\Entity\File;
-use App\Entity\LogEntry;
-use App\Entity\User;
-use App\Repository\FileRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\FileInfo;
+use App\Entity\LogEntries;
 
-class ParsingService
+class LogParser
 {
-    public function __construct(
-        private EntityManagerInterface $entityManager,
-    ){}
-    public function parseLogFile(string $filePath, string $originalFilename, User $user): array
+    private const PATTERN = '/^\[([^\]]+)\]\s+([^.]+)\.([A-Z]+):\s+(.+)$/';
+    public function parseLogFile(string $filePath, FileInfo $file): array
     {
-        $fileSize = filesize($filePath);
-        $file = new File();
-        $file->setFileName($originalFilename);
-        $file->setFileNameTime(time().'.'.$originalFilename);
-        $file->setUploadedAt(new \DateTimeImmutable());
-        $file->setFileSize($fileSize);
-        $file->setUser($user);
-
-        // Persist the file first to get an ID
-        $this->entityManager->persist($file);
-        $this->entityManager->flush();
-
         $content = file_get_contents($filePath);
         $lines = explode("\n", $content);
 
@@ -35,10 +18,10 @@ class ParsingService
         foreach ($lines as $line) {
             $line = trim($line);
             if (empty($line)) continue;
-                $pattern= '/^\[([^\]]+)\]\s+([^.]+)\.([A-Z]+):\s+(.+)$/';
 
-            if (preg_match($pattern, $line, $matches)) {
-                $logEntry = new LogEntry();
+
+            if (preg_match(self::PATTERN, $line, $matches)) {
+                $logEntry = new LogEntries();
 
                 try {
                     $date = new \DateTime($matches[1]);
