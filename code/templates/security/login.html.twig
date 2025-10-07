@@ -1,30 +1,44 @@
-{% block title %}Login - CRM System{% endblock %}
+{% extends 'base.html.twig' %}
+{% block title %}Login - Log Parser{% endblock %}
 
-{% block content %}
-    <div class="text-center mb-4">
-        <i class="bi bi-person-circle fs-1 text-primary"></i>
-        <h4 class="fw-semibold mt-2">Sign in to your account</h4>
+{% block body %}
+    <div class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <div class="text-center mb-6">
+                <i class="bi bi-person-circle text-blue-600 text-5xl"></i>
+                <h4 class="text-2xl font-bold text-gray-800 mt-2">Sign in to your account</h4>
+            </div>
+
+            <form action="{{ path('app_login') }}" method="post" class="space-y-4">
+                <div class="mb-3">
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" name="username"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                           value="{{ app.session.get('_security.last_username') }}" placeholder="Enter your username" required autofocus>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Enter your password" required>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center text-sm text-gray-700">
+                        <input type="checkbox" name="_remember_me"
+                               class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        Remember me
+                    </label>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                    Sign in
+                </button>
+            </form>
+        </div>
     </div>
-
-    <form action="{{ path('app_login') }}" method="post">
-        <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" id="username" name="username" class="form-control"
-                   value="{{ app.session.get('_security.last_username') }}" placeholder="Enter your username" required autofocus>
-        </div>
-
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
-        </div>
-        <div class="flex items-center justify-between">
-            <label class="flex items-center text-sm text-gray-700">
-                <input type="checkbox" name="_remember_me" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                Remember me
-            </label>
-        </div>
-
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-        <button type="submit" class="btn btn-primary w-100">Sign in</button>
-    </form>
 {% endblock %}

@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Validation
 {
-    private const MAX_FILE_SIZE = 10485760; // 10MB in bytes
+    private const MAX_FILE_SIZE = 10485760;
     private const ALLOWED_EXTENSIONS = ['log', 'txt'];
 
     public function validate(UploadedFile $file): void
