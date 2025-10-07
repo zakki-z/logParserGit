@@ -7,8 +7,6 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Pagerfanta;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -45,6 +43,65 @@ class LogEntriesRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    public function findByUserWithFilters(User $user, array $filters): QueryBuilder
+    {
+        $queryBuilder = $this->createQueryBuilder('l')
+            ->join('l.file', 'f')
+            ->andWhere('f.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('l.date', 'DESC');
+
+        // Filter by type/severity
+        if (!empty($filters['type'])) {
+            $queryBuilder->andWhere('l.type = :type')
+                ->setParameter('type', $filters['type']);
+        }
+
+        // Filter by channel
+        if (!empty($filters['channel'])) {
+            $queryBuilder->andWhere('l.channel = :channel')
+                ->setParameter('channel', $filters['channel']);
+        }
+
+        // Filter by file name
+        if (!empty($filters['fileName'])) {
+            $queryBuilder->andWhere('f.fileName = :fileName')
+                ->setParameter('fileName', $filters['fileName']);
+        }
+
+        // Search in information field
+        if (!empty($filters['search'])) {
+            $queryBuilder->andWhere('l.information LIKE :search')
+                ->setParameter('search', '%' . $filters['search'] . '%');
+        }
+
+        // Date range filters
+        if (!empty($filters['dateFrom'])) {
+            try {
+                $dateFrom = new \DateTime($filters['dateFrom']);
+                $dateFrom->setTime(0, 0, 0);
+                $queryBuilder->andWhere('l.date >= :dateFrom')
+                    ->setParameter('dateFrom', $dateFrom);
+            } catch (\Exception $e) {
+                // Invalid date format, skip filter
+            }
+        }
+
+        if (!empty($filters['dateTo'])) {
+            try {
+                $dateTo = new \DateTime($filters['dateTo']);
+                $dateTo->setTime(23, 59, 59);
+                $queryBuilder->andWhere('l.date <= :dateTo')
+                    ->setParameter('dateTo', $dateTo);
+            } catch (\Exception $e) {
+                // Invalid date format, skip filter
+            }
+        }
+
+        return $queryBuilder;
+    }
+
+
     public function findByUserQueryBuilder(User $user): QueryBuilder
     {
         return $this->createQueryBuilder('l')

@@ -1,3 +1,54 @@
-_security_logout:
-    resource: security.route_loader.logout
-    type: service
+security:
+    password_hashers:
+        App\Entity\User:
+            #option 1 : plaintext 7it kan inserew direct f base données -> donc password makahsouch ythasha w nkhdmo ghi b plaintext fl phase d dev
+            #option 2 : ndiro auto w nmchiw nhashiw chi password (bycrypt)  w hia li inserwha f base données !
+            algorithm: auto
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: username
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: app_user_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                username_parameter: username
+                password_parameter: password
+                default_target_path: app_upload_process
+                enable_csrf: true
+            logout:
+                path: app_logout
+                target: app_home
+
+            # remember me
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 week in seconds
+                path: /
+                always_remember_me: false
+    access_control:
+        # Public routes
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+
+        # Protected routes
+        - { path: ^/upload, roles: ROLE_USER }
+        - { path: ^/log, roles: ROLE_USER }
+        - { path: ^/pdf, roles: ROLE_USER }
+        - { path: ^/clear, roles: ROLE_USER }
+        - { path: ^/user, roles: ROLE_USER }
+
+        # Logout is public
+        - { path: ^/logout, roles: PUBLIC_ACCESS }
+
