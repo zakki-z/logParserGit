@@ -9,7 +9,7 @@
                 <div class="bg-blue-600 px-6 py-4">
                     <h3 class="text-2xl font-bold text-white">Upload Log File</h3>
                 </div>
-                <div class="p-6">
+                <div class="p-16">
                     {% for message in app.flashes('success') %}
                         <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 relative" role="alert">
                             {{ message }}
@@ -28,24 +28,23 @@
                         </div>
                     {% endfor %}
 
-                    <form method="post" action="{{ path('app_upload_process') }}" enctype="multipart/form-data" class="space-y-4">
+                    <form method="post" action="{{ path('app_upload') }}" enctype="multipart/form-data" class="space-y-4">
+                        {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+
                         <div class="form-group">
-                            <label for="log_file" class="block text-gray-700 font-medium mb-2">Select Log File</label>
-                            <input type="file"
-                                   class="form-control w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   id="log_file"
-                                   name="log_file"
-                                   accept=".log,.txt"
-                                   required>
+                            {{ form_label(form.log_file, null, {'label_attr': {'class': 'block text-gray-700 font-medium mb-2'}}) }}
+                            {{ form_widget(form.log_file) }}
+                            {{ form_errors(form.log_file) }}
                             <div class="text-sm text-gray-600 mt-2">
                                 Allowed formats: .log, .txt (Max size: 10MB)
                             </div>
                         </div>
+
                         <div>
-                            <button type="submit" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
-                                Upload File
-                            </button>
+                            {{ form_widget(form.submit) }}
                         </div>
+
+                        {{ form_end(form) }}
                     </form>
 
                     <hr class="my-6 border-gray-300">

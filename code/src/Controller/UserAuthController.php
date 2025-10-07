@@ -15,7 +15,7 @@ class UserAuthController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_upload_process');
+            return $this->redirectToRoute('app_upload');
         }
 
         $error = $authenticationUtils->getLastAuthenticationError();

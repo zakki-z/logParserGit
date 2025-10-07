@@ -35,36 +35,83 @@
                 </a>
             </div>
             <!--filter-->
-            <!--type filter-->
-            <div class="mb-4">
-                <label for="severityFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Type:</label>
-                <form action="{{ path('app_log_view') }}" method="get" class="inline">
-                    <select id="severityFilter" name="severity" class="form-select rounded-md border-gray-300 text-sm" onchange="this.form.submit()">
-                        <option value="">All Types</option>
-                        <option value="ERROR" {% if severityFilter == 'ERROR' %}selected{% endif %}>ERROR</option>
-                        <option value="WARNING" {% if severityFilter == 'WARNING' %}selected{% endif %}>WARNING</option>
-                        <option value="INFO" {% if severityFilter == 'INFO' %}selected{% endif %}>INFO</option>
-                        <option value="DEBUG" {% if severityFilter == 'DEBUG' %}selected{% endif %}>DEBUG</option>
-                    </select>
-                    {% if pager.hasNextPage or pager.hasPreviousPage %}
-                        <input type="hidden" name="page" value="{{ pager.currentPage }}">
-                    {% endif %}
-                </form>
-            </div>
-            <!--time filter-->
-            {% set dateFrom = dateFrom|default(app.request.query.get('dateFrom')) %}
-            {% set dateTo = dateTo|default(app.request.query.get('dateTo')) %}
-            <label for="dateFromFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date:</label>
-            <span class="text-gray-500">from</span>
-            <input type="hidden" id="dateFrom" name="dateFrom" value="{{ dateFrom|date('Y-m-d') }}">
-            <input type="hidden" id="dateTo" name="dateTo" value="{{ dateTo|date('Y-m-d') }}">
-            <input type="date" id="dateFromFilter" name="dateFromFilter" class="form-input rounded-md border-gray-300 text-sm" value="{{ dateFrom|date('Y-m-d') }}" onchange="this.form.submit()">
-            <span class="text-gray-500">to</span>
-            <input type="date" id="dateToFilter" name="dateToFilter" class="form-input rounded-md border-gray-300 text-sm" value="{{ dateTo|date('Y-m-d') }}" onchange="this.form.submit()">
+            <form method="get" action="{{ path('app_log_view') }}" class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <!-- Search -->
+                    <div>
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search:</label>
+                        <input
+                            type="text"
+                            id="search"
+                            name="search"
+                            value="{{ filters.search }}"
+                            placeholder="Search in messages..."
+                            class="form-input w-full rounded-md border-gray-300 text-sm"
+                        >
+                    </div>
+                    <!-- Type Filter -->
+                    <div>
+                        <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Filter by Type:</label>
+                        <select id="type" name="type" onchange="this.form.submit()" class="form-select w-full rounded-md border-gray-300 text-sm">
+                            <option value="">All Types</option>
+                            <option value="ERROR" {% if filters.type == 'ERROR' %}selected{% endif %}>ERROR</option>
+                            <option value="WARNING" {% if filters.type == 'WARNING' %}selected{% endif %}>WARNING</option>
+                            <option value="INFO" {% if filters.type == 'INFO' %}selected{% endif %}>INFO</option>
+                            <option value="DEBUG" {% if filters.type == 'DEBUG' %}selected{% endif %}>DEBUG</option>
+                        </select>
+                    </div>
+                    <!-- Channel Filter -->
+                    <div>
+                        <label for="channel" class="block text-sm font-medium text-gray-700 mb-1">Filter by Channel:</label>
+                        <input
+                            type="text"
+                            id="channel"
+                            name="channel"
+                            value="{{ filters.channel }}"
+                            placeholder="Enter channel name..."
+                            class="form-input w-full rounded-md border-gray-300 text-sm"
+                            onchange="this.form.submit()"
+                        >
+                    </div>
+                    <!-- File Name Filter -->
+                    <div>
+                        <label for="fileName" class="block text-sm font-medium text-gray-700 mb-1">Filter by Source:</label>
+                        <input
+                            type="text"
+                            id="fileName"
+                            name="fileName"
+                            value="{{ filters.fileName }}"
+                            placeholder="Enter file name..."
+                            class="form-input w-full rounded-md border-gray-300 text-sm"
+                            onchange="this.form.submit()"
+                        >
+                    </div>
+                </div>
+                <!-- Date Range Filter -->
+                <div class="flex items-center gap-4 mb-4">
+                    <label class="text-sm font-medium text-gray-700">Filter by Date:</label>
+                    <span class="text-gray-500">from</span>
+                    <input
+                        type="date"
+                        name="dateFrom"
+                        value="{{ filters.dateFrom }}"
+                        onchange="this.form.submit()"
+                        class="form-input rounded-md border-gray-300 text-sm"
+                    >
+                    <span class="text-gray-500">to</span>
+                    <input
+                        type="date"
+                        name="dateTo"
+                        value="{{ filters.dateTo }}"
+                        onchange="this.form.submit()"
+                        class="form-input rounded-md border-gray-300 text-sm"
+                    >
+                    <a href="{{ path('app_log_view') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                        Reset
+                    </a>
+                </div>
+            </form>
             <!--buttons-->
-            <button class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
-                Reset Filters
-            </button>
             <div class="flex items-center justify-end  mb-4 gap-[2vw]">
                 <p class="text-gray-600">Total entries: <strong class="text-gray-800">{{ pager.nbResults }}</strong></p>
                 <form action="{{ path('log_clear') }}" method="post" style="display: inline;">
@@ -73,10 +120,17 @@
                     </button>
                 </form>
                 <form action="{{ path('log_pdf') }}" method="get" style="display: inline;">
+                    <input type="hidden" name="type" value="{{ filters.type }}">
+                    <input type="hidden" name="channel" value="{{ filters.channel }}">
+                    <input type="hidden" name="fileName" value="{{ filters.fileName }}">
+                    <input type="hidden" name="search" value="{{ filters.search }}">
+                    <input type="hidden" name="dateFrom" value="{{ filters.dateFrom }}">
+                    <input type="hidden" name="dateTo" value="{{ filters.dateTo }}">
                     <button type="submit" class="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition duration-200">
                         Download PDF
                     </button>
                 </form>
+
             </div>
 
             <div class="table-responsive overflow-x-auto">
@@ -126,20 +180,21 @@
                 </table>
             </div>
             <!--pager-->
+            <!--pager-->
             <div class="flex justify-center mt-6">
                 <nav class="flex space-x-2">
                     {% if pager.hasPreviousPage %}
-                        <a href="{{ path('app_log_view', {'page': pager.previousPage}) }}"
+                        <a href="{{ path('app_log_view', filters|merge({'page': pager.previousPage})) }}"
                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                             « Previous
                         </a>
                     {% endif %}
                     <span class="px-4 py-2 text-sm font-medium text-gray-700">
-                        Page {{ pager.currentPage }} of {{ pager.nbPages }}
-                    </span>
+            Page {{ pager.currentPage }} of {{ pager.nbPages }}
+        </span>
 
                     {% if pager.hasNextPage %}
-                        <a href="{{ path('app_log_view', {'page': pager.nextPage}) }}"
+                        <a href="{{ path('app_log_view', filters|merge({'page': pager.nextPage})) }}"
                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                             Next »
                         </a>
