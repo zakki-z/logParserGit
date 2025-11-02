@@ -3,58 +3,94 @@
 {% block title %}Upload Log File{% endblock %}
 
 {% block body %}
-    <div class="min-h-screen py-12 px-4 flex items-center justify-center">
-        <div class="max-w-2xl mx-auto w-full">
-            <div class="bg-white rounded-lg overflow-hidden">
-                <div class="bg-blue-600 px-6 py-4">
-                    <h3 class="text-2xl font-bold text-white">Upload Log File</h3>
-                </div>
-                <div class="p-16">
-                    {% for message in app.flashes('success') %}
-                        <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 relative" role="alert">
-                            {{ message }}
-                            <button type="button" class="absolute top-0 right-0 px-4 py-3" data-bs-dismiss="alert">
-                                <span class="text-2xl">&times;</span>
-                            </button>
-                        </div>
-                    {% endfor %}
+    <!--header-->
+    <header class="flex items-center justify-between border-b border-gray-300 px-10 py-4 bg-white shadow-sm">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Log Analyzer</h2>
+        </div>
 
-                    {% for message in app.flashes('error') %}
-                        <div class="alert alert-danger bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative" role="alert">
-                            {{ message }}
-                            <button type="button" class="absolute top-0 right-0 px-4 py-3" data-bs-dismiss="alert">
-                                <span class="text-2xl">&times;</span>
-                            </button>
-                        </div>
-                    {% endfor %}
-
-                    <form method="post" action="{{ path('app_upload') }}" enctype="multipart/form-data" class="space-y-4">
-                        {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
-
-                        <div class="form-group">
-                            {{ form_label(form.log_file, null, {'label_attr': {'class': 'block text-gray-700 font-medium mb-2'}}) }}
-                            {{ form_widget(form.log_file) }}
-                            {{ form_errors(form.log_file) }}
-                            <div class="text-sm text-gray-600 mt-2">
-                                Allowed formats: .log, .txt (Max size: 10MB)
-                            </div>
-                        </div>
-
-                        <div>
-                            {{ form_widget(form.submit) }}
-                        </div>
-
-                        {{ form_end(form) }}
+        <div class="flex items-center space-x-4">
+            {% if app.user %}
+                <div class="flex items-center space-x-2">
+                    <span class="text-gray-700">
+                        <button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-200">
+                            <a href="#" class="text-gray-800">User Info</a>
+                        </button>
+                    </span>
+                    <form action="{{ path('app_logout') }}" method="post" style="display: inline;">
+                        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200">
+                            Logout
+                        </button>
                     </form>
+                </div>
+            {% endif %}
+        </div>
+    </header>
 
-                    <hr class="my-6 border-gray-300">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Navigation -->
+            <div class="mb-6">
+                <a href="{{ path('app_log_view') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+                    ← Back to Log Entries
+                </a>
+            </div>
 
-                    <div>
-                        <a href="{{ path('app_log_view') }}" class="inline-block text-blue-600 hover:text-blue-800 font-medium">
-                            View My Uploaded Files →
+            <!-- Upload Card -->
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Upload Log File</h1>
+                    <p class="text-gray-600">Select a log file to upload and analyze</p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% for message in app.flashes('success') %}
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 relative" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
+                        <button type="button" class="absolute top-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none'">
+                            <span class="text-xl">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+
+                {% for message in app.flashes('error') %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
+                        <button type="button" class="absolute top-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none'">
+                            <span class="text-xl">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+
+                <!-- Upload Form -->
+                {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+                <div class="space-y-6">
+                    <div class="form-group">
+                        {{ form_label(form.log_file, 'Select Log File', {'label_attr': {'class': 'block text-lg font-medium text-gray-700 mb-3'}}) }}
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition duration-200">
+                            {{ form_widget(form.log_file, {'attr': {'class': 'block w-full text-sm text-gray-900 cursor-pointer bg-transparent focus:outline-none'}}) }}
+                        </div>
+                        {{ form_errors(form.log_file) }}
+                        <div class="mt-4 text-sm text-gray-600 bg-gray-50 rounded-lg p-4">
+                            <h4 class="font-medium text-gray-700 mb-2">File Requirements:</h4>
+                            <ul class="space-y-1">
+                                <li>• <strong>Formats:</strong> .log, .txt files only</li>
+                                <li>• <strong>Size limit:</strong> Maximum 10MB</li>
+                                <li>• <strong>Content:</strong> Standard log format preferred</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-4 pt-4">
+                        {{ form_widget(form.submit, {'attr': {'class': 'px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 text-lg'}}) }}
+                        <a href="{{ path('app_log_view') }}" class="px-8 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-lg transition duration-200 text-lg">
+                            Cancel
                         </a>
                     </div>
                 </div>
+
+                {{ form_end(form) }}
             </div>
         </div>
     </div>

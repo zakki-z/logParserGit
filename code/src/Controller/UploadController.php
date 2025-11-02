@@ -31,13 +31,11 @@ class UploadController extends AbstractController
 
                 $this->addFlash('success', $result['message']);
 
-                return $this->redirectToRoute('app_log_view', [
-                    'id' => $result['file']->getId()
-                ]);
+                return $this->redirectToRoute('app_log_view');
 
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Upload failed: ' . $e->getMessage());
-                return $this->redirectToRoute('app_upload');
+                return $this->redirectToRoute('app_log_view');
             }
         }
         return $this->render('upload/index.html.twig', [

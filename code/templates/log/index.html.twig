@@ -26,12 +26,12 @@
             {% endif %}
         </div>
     </header>
-    <div class="container mx-auto px-4 py-8">
+    <div class="dark:bg-gray-800 mx-auto px-4 py-8">
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-3xl font-bold text-gray-800">Log Entries</h1>
-                <a href="{{ path('app_upload') }}" class="text-blue-600 hover:text-blue-800 font-medium">
-                    Upload Another File →
+                <a href="#uploadModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200">
+                    Upload Log File
                 </a>
             </div>
             <!--filter-->
@@ -180,7 +180,6 @@
                 </table>
             </div>
             <!--pager-->
-            <!--pager-->
             <div class="flex justify-center mt-6">
                 <nav class="flex space-x-2">
                     {% if pager.hasPreviousPage %}
@@ -203,4 +202,104 @@
             </div>
         </div>
     </div>
+    <!-- CSS-Only Modal Popup -->
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3 class="text-xl font-semibold text-gray-900">Upload Log File</h3>
+                <a href="#" class="modal-close">&times;</a>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                {{ form_start(form, {'action': path('app_upload'), 'attr': {'class': 'space-y-4'}}) }}
+
+                <div class="space-y-4">
+                    <div class="form-group">
+                        {{ form_label(form.log_file, 'Select Log File', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+                        {{ form_widget(form.log_file, {'attr': {'class': 'block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none p-2'}}) }}
+                        {{ form_errors(form.log_file) }}
+                        <p class="text-sm text-gray-600 mt-2">
+                            Supported formats: .log, .txt | Max size: 10MB
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <a href="#" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-lg transition duration-200">
+                        Cancel
+                    </a>
+                    {{ form_widget(form.submit, {'attr': {'class': 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200'}}) }}
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* CSS-Only Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay:target {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-close {
+            color: #9ca3af;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #6b7280;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 24px;
+        }
+    </style>
 {% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Form\LogFileUploadType;
 use App\Repository\LogEntriesRepository;
 use App\Service\LogFilterService;
 use App\Service\PdfMaker;
@@ -34,10 +35,13 @@ final class LogController extends AbstractController
         $pagerfanta = new Pagerfanta($adapter);
         $pagerfanta->setMaxPerPage(10);
         $pagerfanta->setCurrentPage($request->query->get('page', 1));
+
+        $uploadForm = $this->createForm(LogFileUploadType::class);
         return $this->render('log/index.html.twig', [
             'logEntries' => $pagerfanta->getCurrentPageResults(),
             'pager' => $pagerfanta,
             'filters' => $filters,
+            'form' => $uploadForm->createView(),
         ]);
     }
     #[Route('/pdf', name: 'log_pdf', methods: ['GET'])]
