@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Repository\LogEntriesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\File;
 
 class FileUpload
 {
@@ -23,15 +24,16 @@ class FileUpload
         $this->ensureDirectoryExists($this->uploadDirectory);
         $this->ensureDirectoryExists($this->uploadPath);
     }
+
     public function upload(UploadedFile $file, string $filename): string
     {
         $file->move($this->uploadDirectory, $filename);
-        $file->move($this->uploadPath, $filename);
         $sourcePath = $this->uploadDirectory . '/' . $filename;
         $targetPath = $this->uploadPath . '/' . $filename;
         copy($sourcePath, $targetPath);
         return $sourcePath;
     }
+
     private function ensureDirectoryExists(string $dir): void
     {
         if (!is_dir($dir)) {

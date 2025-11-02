@@ -132,5 +132,82 @@ class LogEntriesRepository extends ServiceEntityRepository
             ->execute();
 
     }
+    /**
+     * Count total logs for a user
+     */
+    public function countByUser(User $user): int
+    {
+        return $this->createQueryBuilder('l')
+            ->select('COUNT(l.id)')
+            ->join('l.file', 'f')
+            ->where('f.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Count logs by user and type
+     */
+    public function countByUserAndType(User $user, string $type): int
+    {
+        return $this->createQueryBuilder('l')
+            ->select('COUNT(l.id)')
+            ->join('l.file', 'f')
+            ->where('f.user = :user')
+            ->andWhere('l.type = :type')
+            ->setParameter('user', $user)
+            ->setParameter('type', $type)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Find recent logs for a user
+     */
+    public function findRecentByUser(User $user, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('l')
+            ->join('l.file', 'f')
+            ->where('f.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('l.date', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find logs within date range for a user
+     */
+    public function findByUserAndDateRange(User $user, \DateTime $startDate, \DateTime $endDate): array
+    {
+        return $this->createQueryBuilder('l')
+            ->join('l.file', 'f')
+            ->where('f.user = :user')
+            ->andWhere('l.date BETWEEN :startDate AND :endDate')
+            ->setParameter('user', $user)
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->orderBy('l.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Get log statistics by type for a user
+     */
+    public function getLogStatsByType(User $user): array
+    {
+        return $this->createQueryBuilder('l')
+            ->select('l.type', 'COUNT(l.id) as count')
+            ->join('l.file', 'f')
+            ->where('f.user = :user')
+            ->setParameter('user', $user)
+            ->groupBy('l.type')
+            ->orderBy('count', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
 }

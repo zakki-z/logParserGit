@@ -24,7 +24,6 @@ class FileInfoFactory
 
         return $fileInfo;
     }
-
     private function generateUniqueFilename(string $extension): string
     {
         return uniqid('', true) . '.' . $extension;

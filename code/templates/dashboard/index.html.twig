@@ -1,0 +1,427 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - Log Analyzer{% endblock %}
+
+{% block body %}
+    <!--header-->
+    <header class="flex items-center justify-between border-b border-gray-300 px-10 py-4 bg-white shadow-sm">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+            <p class="text-sm text-gray-600">Real-time log analytics</p>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            {% if app.user %}
+                <div class="flex items-center space-x-2">
+                    <span class="text-gray-700">
+                        <button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-200">
+                            <a href="{{ path('app_log_view') }}" class="text-gray-800">View Logs</a>
+                        </button>
+                    </span>
+                    <span class="text-gray-700">
+                        <button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-200">
+                            <a href="#" class="text-gray-800">User Info</a>
+                        </button>
+                    </span>
+                    <form action="{{ path('app_logout') }}" method="post" style="display: inline;">
+                        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Controls -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <button id="refreshBtn" class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                </button>
+                <label class="flex items-center">
+                    <input type="checkbox" id="autoRefresh" checked class="mr-2 rounded">
+                    <span class="text-sm text-gray-700">Auto-refresh (30s)</span>
+                </label>
+            </div>
+            <div class="text-sm text-gray-500">
+                Last updated: <span id="lastUpdate">{{ "now"|date("H:i:s") }}</span>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <!-- Total Logs -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-full mr-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Total Logs</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalLogs">{{ stats.totalLogs }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Errors -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-red-100 rounded-full mr-4">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Errors</p>
+                        <p class="text-2xl font-bold text-red-600" id="errorCount">{{ stats.errorCount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warnings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-yellow-100 rounded-full mr-4">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Warnings</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="warningCount">{{ stats.warningCount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-full mr-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Info</p>
+                        <p class="text-2xl font-bold text-blue-600" id="infoCount">{{ stats.infoCount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debug -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-purple-100 rounded-full mr-4">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Debug</p>
+                        <p class="text-2xl font-bold text-purple-600" id="debugCount">{{ stats.debugCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Tables Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Log Type Chart -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Log Distribution</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="logTypeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Channels -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Top Channels</h3>
+                <div id="channelsList">
+                    {% for channel in stats.topChannels %}
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="text-gray-700">{{ channel.channel }}</span>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">{{ channel.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Logs Table -->
+        <div class="mt-6 bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Recent Log Entries</h3>
+                <a href="{{ path('app_log_view') }}" class="text-blue-600 hover:text-blue-800 text-sm">View All →</a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Channel</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Message</th>
+                    </tr>
+                    </thead>
+                    <tbody id="recentLogsTable">
+                    {% for log in recentLogs %}
+                        <tr class="border-b border-gray-100">
+                            <td class="px-4 py-2 text-sm text-gray-900">{{ log.date|date('m-d H:i') }}</td>
+                            <td class="px-4 py-2">
+                                    <span class="px-2 py-1 text-xs rounded-full
+                                        {% if log.type == 'ERROR' %}bg-red-100 text-red-800
+                                        {% elseif log.type == 'WARNING' %}bg-yellow-100 text-yellow-800
+                                        {% elseif log.type == 'INFO' %}bg-blue-100 text-blue-800
+                                        {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                        {{ log.type }}
+                                    </span>
+                            </td>
+                            <td class="px-4 py-2 text-sm text-gray-700">{{ log.channel }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-600 max-w-xs truncate">{{ log.information|slice(0, 80) }}...</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Dashboard functionality
+        let chart;
+        let autoRefreshInterval;
+        let isUpdating = false;
+
+        function initChart() {
+            const ctx = document.getElementById('logTypeChart').getContext('2d');
+            const stats = {
+                error: {{ stats.errorCount }},
+                warning: {{ stats.warningCount }},
+                info: {{ stats.infoCount }},
+                debug: {{ stats.debugCount }}
+            };
+
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Errors', 'Warnings', 'Info', 'Debug'],
+                    datasets: [{
+                        data: [stats.error, stats.warning, stats.info, stats.debug],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1.5,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                fontSize: 12
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 300
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            if (isUpdating) return; // Prevent multiple simultaneous updates
+            isUpdating = true;
+
+            // Show loading state
+            const refreshBtn = document.getElementById('refreshBtn');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Loading...';
+            refreshBtn.disabled = true;
+
+            fetch('{{ path("api_dashboard_data") }}', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    // Update stats with animation
+                    updateStatWithAnimation('totalLogs', data.stats.totalLogs);
+                    updateStatWithAnimation('errorCount', data.stats.errorCount);
+                    updateStatWithAnimation('warningCount', data.stats.warningCount);
+                    updateStatWithAnimation('infoCount', data.stats.infoCount);
+                    updateStatWithAnimation('debugCount', data.stats.debugCount);
+
+                    document.getElementById('lastUpdate').textContent = data.lastUpdate;
+
+                    // Update chart efficiently
+                    if (chart) {
+                        chart.data.datasets[0].data = [
+                            data.stats.errorCount,
+                            data.stats.warningCount,
+                            data.stats.infoCount,
+                            data.stats.debugCount
+                        ];
+                        chart.update('none'); // No animation for performance
+                    }
+
+                    // Update channels list efficiently
+                    updateChannelsList(data.stats.topChannels);
+
+                    // Update recent logs table efficiently
+                    updateRecentLogsTable(data.recentLogs);
+                })
+                .catch(error => {
+                    console.error('Dashboard update failed:', error);
+                    // Show error message briefly
+                    const lastUpdate = document.getElementById('lastUpdate');
+                    const originalText = lastUpdate.textContent;
+                    lastUpdate.textContent = 'Update failed';
+                    lastUpdate.style.color = '#ef4444';
+                    setTimeout(() => {
+                        lastUpdate.textContent = originalText;
+                        lastUpdate.style.color = '';
+                    }, 3000);
+                })
+                .finally(() => {
+                    refreshBtn.innerHTML = originalText;
+                    refreshBtn.disabled = false;
+                    isUpdating = false;
+                });
+        }
+
+        function updateStatWithAnimation(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const currentValue = parseInt(element.textContent);
+            if (currentValue !== newValue) {
+                element.style.transform = 'scale(1.1)';
+                element.style.transition = 'transform 0.2s';
+                setTimeout(() => {
+                    element.textContent = newValue;
+                    element.style.transform = 'scale(1)';
+                }, 100);
+            }
+        }
+
+        function updateChannelsList(channels) {
+            const channelsList = document.getElementById('channelsList');
+            const html = channels.map(channel =>
+                `<div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-700">${escapeHtml(channel.channel)}</span>
+                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">${channel.count}</span>
+                </div>`
+            ).join('');
+            channelsList.innerHTML = html;
+        }
+
+        function updateRecentLogsTable(logs) {
+            const tableBody = document.getElementById('recentLogsTable');
+            const html = logs.map(log => {
+                const typeClass = {
+                    'ERROR': 'bg-red-100 text-red-800',
+                    'WARNING': 'bg-yellow-100 text-yellow-800',
+                    'INFO': 'bg-blue-100 text-blue-800',
+                    'DEBUG': 'bg-purple-100 text-purple-800'
+                }[log.type] || 'bg-gray-100 text-gray-800';
+
+                const date = new Date(log.date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `<tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="px-4 py-2 text-sm text-gray-900">${formattedDate}</td>
+                    <td class="px-4 py-2">
+                        <span class="px-2 py-1 text-xs rounded-full ${typeClass}">${log.type}</span>
+                    </td>
+                    <td class="px-4 py-2 text-sm text-gray-700">${escapeHtml(log.channel)}</td>
+                    <td class="px-4 py-2 text-sm text-gray-600 max-w-xs truncate" title="${escapeHtml(log.information)}">${escapeHtml(log.information)}</td>
+                </tr>`;
+            }).join('');
+            tableBody.innerHTML = html;
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(() => {
+                if (!isUpdating) updateDashboard();
+            }, 30000);
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only initialize chart if canvas exists
+            const canvas = document.getElementById('logTypeChart');
+            if (canvas) {
+                initChart();
+            }
+
+            startAutoRefresh();
+
+            // Refresh button
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', updateDashboard);
+            }
+
+            // Auto-refresh toggle
+            const autoRefreshToggle = document.getElementById('autoRefresh');
+            if (autoRefreshToggle) {
+                autoRefreshToggle.addEventListener('change', function(e) {
+                    if (e.target.checked) {
+                        startAutoRefresh();
+                    } else {
+                        stopAutoRefresh();
+                    }
+                });
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            stopAutoRefresh();
+            if (chart) {
+                chart.destroy();
+            }
+        });
+    </script>
+{% endblock %}
