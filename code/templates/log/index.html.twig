@@ -240,6 +240,30 @@
                 </div>
 
                 {{ form_end(form) }}
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">OR</span>
+                    </div>
+                </div>
+
+                <!-- Process var/log Button -->
+                <form method="post" action="{{ path('app_process_var_logs') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('process_var_logs') }}">
+                    <button type="submit"
+                            class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                            onclick="return confirm('This will process all log files from var/log directory. Continue?')">
+                        <span>📁</span>
+                        <span>Process var/log Files</span>
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2 text-center">
+                        Import existing log files from the server's var/log directory
+                    </p>
+                </form>
             </div>
         </div>
     </div>
