@@ -12,28 +12,20 @@ use Symfony\Component\HttpFoundation\File\File;
 class FileUpload
 {
     private string $uploadDirectory;
-    private string $uploadPath;
 
     public function __construct(
         string $uploadDirectory,
-        string $uploadPath
     )
     {
         $this->uploadDirectory = $uploadDirectory;
-        $this->uploadPath = $uploadPath;
         $this->ensureDirectoryExists($this->uploadDirectory);
-        $this->ensureDirectoryExists($this->uploadPath);
     }
 
     public function upload(UploadedFile $file, string $filename): string
     {
         $file->move($this->uploadDirectory, $filename);
-        $sourcePath = $this->uploadDirectory . '/' . $filename;
-        $targetPath = $this->uploadPath . '/' . $filename;
-        copy($sourcePath, $targetPath);
-        return $sourcePath;
+        return $this->uploadDirectory . '/' . $filename;
     }
-
     private function ensureDirectoryExists(string $dir): void
     {
         if (!is_dir($dir)) {

@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Account - Log Parser{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        #deleteModalToggle:checked ~ #deleteModal {
+            display: flex;
+        }
+        #deleteModalToggle {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <header class="flex items-center justify-between border-b border-gray-300 px-10 py-4 bg-white shadow-sm">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Log Parser</h2>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            {% if app.user %}
+                <div class="flex items-center space-x-2">
+                    <span class="text-gray-700">
+                        <button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-200">
+                            <a href="{{ path('app_dashboard') }}" class="text-gray-800">Dashboard</a>
+                        </button>
+                    </span>
+                    <span class="text-gray-700">
+                        <button class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-200">
+                            <a href="{{ path('app_log_view') }}" class="text-gray-800">View Logs</a>
+                        </button>
+                    </span>
+                    <form action="{{ path('app_logout') }}" method="post" style="display: inline;">
+                        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="min-h-screen dark:bg-gray-800 px-4 py-12">
+        <div class="max-w-2xl mx-auto">
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-white mb-2" style="font-family: 'Spline Sans', sans-serif;">My Account</h1>
+                <p class="text-slate-50">Manage your profile and account settings</p>
+            </div>
+            {% for message in app.flashes('success') %}
+                <div class="mb-6 bg-green-50 border-l-4 border-[#38e07b] p-4 rounded-r-lg">
+                    <div class="flex items-center">
+                        <span class="material-symbols-outlined text-[#38e07b] mr-3">check_circle</span>
+                        <p class="text-green-800 font-medium">{{ message }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                    <div class="flex items-center">
+                        <span class="material-symbols-outlined text-red-500 mr-3">error</span>
+                        <p class="text-red-800 font-medium">{{ message }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm mb-6 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-[#38e07b]">person</span>
+                        Update Information
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+                    <div>
+                        <label for="{{ form.username.vars.id }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Username
+                        </label>
+                        {{ form_widget(form.username, {
+                            'attr': {
+                                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#38e07b] focus:border-transparent transition-all duration-200 outline-none',
+                                'placeholder': 'Enter your username'
+                            }
+                        }) }}
+                        {{ form_errors(form.username) }}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.password.vars.id }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            New Password
+                        </label>
+                        <p class="text-sm text-gray-500 mb-2">Leave blank to keep your current password</p>
+                        {{ form_widget(form.password, {
+                            'attr': {
+                                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#38e07b] focus:border-transparent transition-all duration-200 outline-none',
+                                'placeholder': '••••••••'
+                            }
+                        }) }}
+                        {{ form_errors(form.password) }}
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-[#38e07b] hover:bg-[#2bc765] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined mr-2">save</span>
+                            Update Account
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+            <div class="bg-white border border-red-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-red-50 px-6 py-4 border-b border-red-200">
+                    <h2 class="text-xl font-bold text-red-900 flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-red-600">warning</span>
+                        Danger Zone
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">
+                        Once you delete your account, there is no going back. This action is permanent and cannot be undone.
+                    </p>
+                    <label for="deleteModalToggle" class="cursor-pointer inline-flex bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg items-center">
+                        <span class="material-symbols-outlined mr-2">delete_forever</span>
+                        Delete My Account
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="checkbox" id="deleteModalToggle">
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+            <!-- Modal Header -->
+            <div class="bg-red-600 px-6 py-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <span class="material-symbols-outlined mr-2">error</span>
+                    Confirm Account Deletion
+                </h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700 mb-4">
+                    Are you absolutely sure you want to delete your account?
+                </p>
+                <div class="bg-red-50 border-l-4 border-red-600 p-4 rounded-r mb-4">
+                    <p class="text-red-900 font-bold flex items-center">
+                        <span class="material-symbols-outlined mr-2">warning</span>
+                        This action cannot be undone!
+                    </p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end">
+                <label for="deleteModalToggle" class="cursor-pointer px-6 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    Cancel
+                </label>
+                <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" class="inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                    <button type="submit" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200 flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-sm">delete</span>
+                        Delete Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
